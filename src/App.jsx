@@ -1,12 +1,14 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import "./App.css";
 import PlayerList from "./components/PlayerList";
 import NewPlayerForm from "./components/NewPlayerForm";
 import PlayerDetails from "./components/PlayerDetails";
+import SearchBar from "./components/SearchBar";
 
 function App() {
   const [players, setPlayers] = useState([]);
+  const [query, setQuery] = useState("");
 
   const fetchPlayers = async () => {
     try {
@@ -20,6 +22,10 @@ function App() {
     }
   };
 
+  useEffect(() => {
+    fetchPlayers(); // Fetch players on component mount
+  }, []);
+
   const addPlayer = async (player) => {
     try {
       const response = await fetch(
@@ -30,7 +36,9 @@ function App() {
           body: JSON.stringify(player),
         }
       );
-      await fetchPlayers(); // Refresh the list
+      if (response.ok) {
+        await fetchPlayers(); // Refresh the list after adding a player
+      }
     } catch (error) {
       console.error("Error adding player:", error);
     }
@@ -38,37 +46,40 @@ function App() {
 
   const removePlayer = async (id) => {
     try {
-      await fetch(
+      const response = await fetch(
         `https://fsa-puppy-bowl.herokuapp.com/api/2410-FTB-ET-WEB-FT/players/${id}`,
         { method: "DELETE" }
       );
-      await fetchPlayers(); // Refresh the list
+      if (response.ok) {
+        await fetchPlayers(); // Refresh the list after successful deletion
+      }
     } catch (error) {
       console.error("Error removing player:", error);
     }
   };
+
+  const filteredPlayers = players.filter((player) =>
+    player.name.toLowerCase().includes(query.toLowerCase())
+  );
 
   return (
     <Router>
       <div className="App">
         <h1>Puppy Bowl</h1>
         <Routes>
-          {/* Main Page Route */}
           <Route
             path="/"
             element={
               <>
+                <SearchBar query={query} setQuery={setQuery} />
                 <NewPlayerForm onAddPlayer={addPlayer} />
                 <PlayerList
-                  players={players}
+                  players={filteredPlayers}
                   onRemovePlayer={removePlayer}
-                  onViewDetails={(id) => `/player/${id}`}
-                  fetchPlayers={fetchPlayers}
                 />
               </>
             }
           />
-          {/* Player Details Route */}
           <Route path="/player/:id" element={<PlayerDetails />} />
         </Routes>
       </div>

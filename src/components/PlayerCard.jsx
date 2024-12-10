@@ -1,7 +1,7 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 
-const PlayerCard = ({ player }) => {
+const PlayerCard = ({ player, onRemovePlayer }) => {
   const navigate = useNavigate();
 
   return (
@@ -13,6 +13,7 @@ const PlayerCard = ({ player }) => {
       <button onClick={() => navigate(`/player/${player.id}`)}>
         See Details
       </button>
+      <button onClick={() => onRemovePlayer(player.id)}>Remove</button>
     </div>
   );
 };
