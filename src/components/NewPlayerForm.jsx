@@ -11,11 +11,12 @@ function NewPlayerForm({ onAddPlayer }) {
       alert("All fields are required!");
       return;
     }
+
     const newPlayer = { name, breed, imageUrl };
     await onAddPlayer(newPlayer);
-    setName("");
-    setBreed("");
-    setImageUrl("");
+
+    // Force a full page reload
+    window.location.reload();
   };
 
   return (
