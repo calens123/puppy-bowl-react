@@ -1,7 +1,9 @@
 import { useState } from "react";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import "./App.css";
 import PlayerList from "./components/PlayerList";
 import NewPlayerForm from "./components/NewPlayerForm";
+import PlayerDetails from "./components/PlayerDetails";
 
 function App() {
   const [players, setPlayers] = useState([]);
@@ -47,14 +49,30 @@ function App() {
   };
 
   return (
-    <div className="App">
-      <h1>Puppy Bowl</h1>
-      <NewPlayerForm onAddPlayer={addPlayer} />
-      <PlayerList
-        onRemovePlayer={removePlayer}
-        onViewDetails={(id) => alert(`Player ID: ${id}`)}
-      />
-    </div>
+    <Router>
+      <div className="App">
+        <h1>Puppy Bowl</h1>
+        <Routes>
+          {/* Main Page Route */}
+          <Route
+            path="/"
+            element={
+              <>
+                <NewPlayerForm onAddPlayer={addPlayer} />
+                <PlayerList
+                  players={players}
+                  onRemovePlayer={removePlayer}
+                  onViewDetails={(id) => `/player/${id}`}
+                  fetchPlayers={fetchPlayers}
+                />
+              </>
+            }
+          />
+          {/* Player Details Route */}
+          <Route path="/player/:id" element={<PlayerDetails />} />
+        </Routes>
+      </div>
+    </Router>
   );
 }
 

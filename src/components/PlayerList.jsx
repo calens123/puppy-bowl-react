@@ -1,35 +1,41 @@
-import { useEffect, useState } from "react";
+import React, { useState, useEffect } from "react";
+import PlayerCard from "./PlayerCard";
 
-function PlayerList({ onRemovePlayer, onViewDetails }) {
+const PlayerList = () => {
   const [players, setPlayers] = useState([]);
+  const [loading, setLoading] = useState(true);
+
   useEffect(() => {
-    async function fetchPlayers() {
+    const fetchPlayers = async () => {
       try {
         const response = await fetch(
           "https://fsa-puppy-bowl.herokuapp.com/api/2410-FTB-ET-WEB-FT/players"
         );
-        const { data } = await response.json();
-        setPlayers(data.players);
+        const data = await response.json();
+        if (data.success) {
+          setPlayers(data.data.players);
+        } else {
+          console.error("Error fetching players:", data.error);
+        }
       } catch (error) {
-        console.error("Error fetching players:", error);
+        console.error("Network error:", error);
+      } finally {
+        setLoading(false);
       }
-    }
+    };
+
     fetchPlayers();
   }, []);
 
+  if (loading) return <p>Loading players...</p>;
+
   return (
-    <div id="all-players-container">
+    <div className="player-list">
       {players.map((player) => (
-        <div className="player-card" key={player.id}>
-          <h2>{player.name}</h2>
-          <img src={player.imageUrl} alt={player.name} />
-          <p>Breed: {player.breed}</p>
-          <button onClick={() => onViewDetails(player.id)}>See Details</button>
-          <button onClick={() => onRemovePlayer(player.id)}>Remove</button>
-        </div>
+        <PlayerCard key={player.id} player={player} />
       ))}
     </div>
   );
-}
+};
 
 export default PlayerList;
