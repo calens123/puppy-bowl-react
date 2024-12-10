@@ -1,35 +1,61 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { useState } from "react";
+import "./App.css";
+import PlayerList from "./components/PlayerList";
+import NewPlayerForm from "./components/NewPlayerForm";
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [players, setPlayers] = useState([]);
+
+  const fetchPlayers = async () => {
+    try {
+      const response = await fetch(
+        "https://fsa-puppy-bowl.herokuapp.com/api/2410-FTB-ET-WEB-FT/players"
+      );
+      const { data } = await response.json();
+      setPlayers(data.players);
+    } catch (error) {
+      console.error("Error fetching players:", error);
+    }
+  };
+
+  const addPlayer = async (player) => {
+    try {
+      const response = await fetch(
+        "https://fsa-puppy-bowl.herokuapp.com/api/2410-FTB-ET-WEB-FT/players",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(player),
+        }
+      );
+      await fetchPlayers(); // Refresh the list
+    } catch (error) {
+      console.error("Error adding player:", error);
+    }
+  };
+
+  const removePlayer = async (id) => {
+    try {
+      await fetch(
+        `https://fsa-puppy-bowl.herokuapp.com/api/2410-FTB-ET-WEB-FT/players/${id}`,
+        { method: "DELETE" }
+      );
+      await fetchPlayers(); // Refresh the list
+    } catch (error) {
+      console.error("Error removing player:", error);
+    }
+  };
 
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+    <div className="App">
+      <h1>Puppy Bowl</h1>
+      <NewPlayerForm onAddPlayer={addPlayer} />
+      <PlayerList
+        onRemovePlayer={removePlayer}
+        onViewDetails={(id) => alert(`Player ID: ${id}`)}
+      />
+    </div>
+  );
 }
 
-export default App
+export default App;
